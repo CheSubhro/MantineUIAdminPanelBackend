@@ -8,44 +8,44 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-const uploadOnCloudinary = async (localFilePath) => {
+export const uploadOnCloudinary = async (localFilePath) => {
     try {
         if (!localFilePath) return null;
+
         const response = await cloudinary.uploader.upload(localFilePath, {
-            resource_type: "auto",
+            resource_type: "image",
         });
-        fs.unlinkSync(localFilePath);
-        return response;
-    } catch (error) {
+
         if (fs.existsSync(localFilePath)) {
             fs.unlinkSync(localFilePath);
         }
+
+        return response;
+    } catch (error) {
+        console.error("Cloudinary upload error:", error);
+
+        if (localFilePath && fs.existsSync(localFilePath)) {
+            fs.unlinkSync(localFilePath);
+        }
+
         return null;
     }
 };
 
-const deleteFromCloudinary = async (imageUrl) => {
+export const deleteFromCloudinary = async (publicId) => {
     try {
-        if (!imageUrl) return;
+        if (!publicId) return null;
 
-        const parts = imageUrl.split("/");
-        const filenameWithExtension = parts[parts.length - 1];
-        const publicId = filenameWithExtension.split(".")[0];
+        const response = await cloudinary.uploader.destroy(publicId, {
+            resource_type: "image",
+            invalidate: true,
+        });
 
-        const folderIndex = parts.indexOf("upload");
-        if (folderIndex !== -1 && parts.length > folderIndex + 2) {
-            const folderPath = parts
-                .slice(folderIndex + 2, parts.length - 1)
-                .join("/");
-            const fullPublicId = `${folderPath}/${publicId}`;
-            await cloudinary.uploader.destroy(fullPublicId);
-            return;
-        }
+        console.log("Cloudinary delete response:", response);
 
-        await cloudinary.uploader.destroy(publicId);
+        return response;
     } catch (error) {
-        console.error("Error deleting image from Cloudinary:", error);
+        console.error("Cloudinary delete error:", error);
+        return null;
     }
 };
-
-export { uploadOnCloudinary, deleteFromCloudinary };

@@ -51,7 +51,11 @@ const postSchema = new mongoose.Schema(
         },
         image: {
             type: String,
-            default: "", // Cloudinary Image URL 
+            default: "", // Cloudinary Image URL
+        },
+        imagePublicId: {
+            type: String,
+            default: "",
         },
     },
     {

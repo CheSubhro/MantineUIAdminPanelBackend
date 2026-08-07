@@ -58,10 +58,13 @@ export const createPost = async (req, res) => {
         } = req.body;
 
         let imageUrl = "";
+        let imagePublicId = "";
+
         if (req.file) {
             const cloudinaryResponse = await uploadOnCloudinary(req.file.path);
             if (cloudinaryResponse) {
                 imageUrl = cloudinaryResponse.secure_url;
+                imagePublicId = cloudinaryResponse.public_id;
             }
         }
 
@@ -77,6 +80,7 @@ export const createPost = async (req, res) => {
             status: status || "Published",
             publishDate: publishDate || currentDate,
             image: imageUrl,
+            imagePublicId: imagePublicId,
             updatedAt: currentDate,
         });
 
@@ -101,26 +105,81 @@ export const updatePost = async (req, res) => {
     try {
         const { id } = req.params;
 
-       const existingPost = await Post.findById(id);
+        const existingPost = await Post.findById(id);
+
         if (!existingPost) {
-            return res
-                .status(404)
-                .json({ success: false, message: "Blog post not found." });
+            return res.status(404).json({
+                success: false,
+                message: "Blog post not found.",
+            });
         }
 
-        let updateData = {
-            ...req.body,
+        const updateData = {
             updatedAt: new Date().toISOString().split("T")[0],
         };
 
+        // Update text fields
+        if (req.body.title !== undefined) {
+            updateData.title = req.body.title;
+        }
+
+        if (req.body.slug !== undefined) {
+            updateData.slug = req.body.slug;
+        }
+
+        if (req.body.excerpt !== undefined) {
+            updateData.excerpt = req.body.excerpt;
+        }
+
+        if (req.body.content !== undefined) {
+            updateData.content = req.body.content;
+        }
+
+        if (req.body.category !== undefined) {
+            updateData.category = req.body.category;
+        }
+
+        if (req.body.author !== undefined) {
+            updateData.author = req.body.author;
+        }
+
+        if (req.body.status !== undefined) {
+            updateData.status = req.body.status;
+        }
+
+        if (req.body.publishDate !== undefined) {
+            updateData.publishDate = req.body.publishDate;
+        }
+
+        // ==============================
+        // NEW IMAGE
+        // ==============================
+
         if (req.file) {
+            console.log("New image received:", req.file);
+
+            // Upload new image first
             const cloudinaryResponse = await uploadOnCloudinary(req.file.path);
-            if (cloudinaryResponse) {
-                if (existingPost.image) {
-                    await deleteFromCloudinary(existingPost.image);
-                }
-                updateData.image = cloudinaryResponse.secure_url;
+
+            if (!cloudinaryResponse) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Failed to upload new image.",
+                });
             }
+
+            console.log("New Cloudinary image:", cloudinaryResponse.public_id);
+
+            // Delete OLD image
+            if (existingPost.imagePublicId) {
+                console.log("Deleting old image:", existingPost.imagePublicId);
+
+                await deleteFromCloudinary(existingPost.imagePublicId);
+            }
+
+            // Save NEW image
+            updateData.image = cloudinaryResponse.secure_url;
+            updateData.imagePublicId = cloudinaryResponse.public_id;
         }
 
         const updatedPost = await Post.findByIdAndUpdate(id, updateData, {
@@ -128,13 +187,25 @@ export const updatePost = async (req, res) => {
             runValidators: true,
         });
 
-        res.status(200).json({
+        return res.status(200).json({
             success: true,
             message: "Blog post details updated successfully.",
             data: updatedPost,
         });
     } catch (error) {
-        res.status(400).json({ success: false, message: error.message });
+        console.error("Update post error:", error);
+
+        if (error.code === 11000) {
+            return res.status(400).json({
+                success: false,
+                message: "Slug must be unique.",
+            });
+        }
+
+        return res.status(400).json({
+            success: false,
+            message: error.message,
+        });
     }
 };
 
@@ -142,25 +213,33 @@ export const updatePost = async (req, res) => {
 export const deletePost = async (req, res) => {
     try {
         const { id } = req.params;
+
         const deletedPost = await Post.findByIdAndDelete(id);
 
         if (!deletedPost) {
-            return res
-                .status(404)
-                .json({ success: false, message: "Blog post not found." });
+            return res.status(404).json({
+                success: false,
+                message: "Blog post not found.",
+            });
         }
 
-        if (deletedPost.image) {
-            await deleteFromCloudinary(deletedPost.image);
+        // Delete Cloudinary image
+        if (deletedPost.imagePublicId) {
+            await deleteFromCloudinary(deletedPost.imagePublicId);
         }
 
-        res.status(200).json({
+        return res.status(200).json({
             success: true,
             message: "Blog post has been removed successfully.",
             data: { id },
         });
     } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+        console.error("Delete post error:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: error.message,
+        });
     }
 };
 
@@ -175,23 +254,32 @@ export const bulkDeletePosts = async (req, res) => {
                 message: "No post IDs provided for bulk deletion.",
             });
         }
-
-        const postsToDelete = await Post.find({ _id: { $in: ids } });
-
-        const result = await Post.deleteMany({ _id: { $in: ids } });
-
+        const postsToDelete = await Post.find({
+            _id: { $in: ids },
+        });
+        const result = await Post.deleteMany({
+            _id: { $in: ids },
+        });
+        // Delete images from Cloudinary
         for (const post of postsToDelete) {
-            if (post.image) {
-                await deleteFromCloudinary(post.image);
+            if (post.imagePublicId) {
+                await deleteFromCloudinary(post.imagePublicId);
             }
         }
 
-        res.status(200).json({
+        return res.status(200).json({
             success: true,
             message: `${result.deletedCount} blog posts have been removed successfully.`,
-            data: { deletedIds: ids },
+            data: {
+                deletedIds: ids,
+            },
         });
     } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+        console.error("Bulk delete error:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: error.message,
+        });
     }
 };
