@@ -3,7 +3,7 @@ import Post from "../models/post.model.js";
 import {
     uploadOnCloudinary,
     deleteFromCloudinary,
-} from "../config/cloudinary.js";
+} from "../utils/Cloudinary.js";
 
 // Get All Posts (Search, Status, & Category Filter)
 export const getAllPosts = async (req, res) => {
