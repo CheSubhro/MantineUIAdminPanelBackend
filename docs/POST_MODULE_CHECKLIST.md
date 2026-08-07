@@ -1,19 +1,18 @@
 
 Post Management Module - Backend Checklist (Multer + Cloudinary + MongoDB)
 
-[ ] Cloudinary Configuration (src/config/cloudinary.js)
+[x] Cloudinary Configuration (src/config/cloudinary.js)
 
 Set up the Cloudinary SDK.
-
 Configure connection using environment variables: CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET.
 
-[ ] Multer Middleware Setup (src/middlewares/upload.middleware.js)
+[x] Multer Middleware Setup (src/middlewares/upload.middleware.js)
 
 Configure Multer using memoryStorage or streams.
 
 Implement file filtering to restrict uploads to specific image formats (e.g., .jpg, .png, .webp).
 
-[ ] Post Database Model Update (src/models/Post.model.js)
+[x] Post Database Model Update (src/models/Post.model.js)
 
 Update the Mongoose schema to include: title, slug, excerpt, category, author, status, publishDate, and image (to store the Cloudinary secure_url).
 
