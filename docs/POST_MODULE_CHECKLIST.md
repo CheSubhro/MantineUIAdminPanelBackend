@@ -16,7 +16,7 @@ Implement file filtering to restrict uploads to specific image formats (e.g., .j
 
 Update the Mongoose schema to include: title, slug, excerpt, category, author, status, publishDate, and image (to store the Cloudinary secure_url).
 
-[ ] Post Controller Logic (src/controllers/post.controller.js)
+[x] Post Controller Logic (src/controllers/post.controller.js)
 
 createPost: Capture the uploaded file via Multer, upload it to Cloudinary, and save the post data (including the image URL) to MongoDB.
 
@@ -32,8 +32,8 @@ Setup API endpoints (POST, GET, PUT, DELETE).
 
 Integrate the Multer middleware into the relevant routes.
 
-[ ] Automated Tests & Bruno API Collection
+[x] Automated Tests & Bruno API Collection
 
-Tests (src/tests/post.test.js): Create unit and integration tests using Jest and Supertest, covering all CRUD operations including file upload scenarios.
+Tests : Create unit and integration tests using Jest and Supertest, covering all CRUD operations including file upload scenarios.
 
 Bruno API Collection (bruno-collections/posts/*.bru): Prepare the required .bru files for all post-related API requests.
