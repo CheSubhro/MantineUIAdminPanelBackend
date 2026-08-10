@@ -22,7 +22,7 @@ const commentSchema = new mongoose.Schema(
         content: {
             type: String,
             required: [true, "Comment content is required"],
-            trim: (and) => true,
+            trim: true,
             maxlength: [1000, "Comment cannot exceed 1000 characters"],
         },
         postId: {
@@ -42,6 +42,19 @@ const commentSchema = new mongoose.Schema(
             default: "pending",
             index: true,
         },
+        replies: [
+            {
+                replyContent: {
+                    type: String,
+                    required: true,
+                    trim: true,
+                },
+                createdAt: {
+                    type: Date,
+                    default: Date.now,
+                },
+            },
+        ],
         updatedAt: {
             type: String,
             default: () => new Date().toISOString().split("T")[0],
