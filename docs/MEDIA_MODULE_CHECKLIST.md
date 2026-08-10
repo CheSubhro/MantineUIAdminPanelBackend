@@ -28,13 +28,13 @@ uploadMedia: Handle file uploads (integrating with Cloudinary/Multer), save file
 
 deleteMedia: Delete a media file record from MongoDB (and optionally remove from Cloudinary) using its id.
 
-[ ] Media API Routes Configuration (src/routes/media.routes.js)
+[x] Media API Routes Configuration (src/routes/media.routes.js)
 
 Set up endpoints: GET /api/media, POST /api/media/upload, and DELETE /api/media/:id.
 
 Protect private media routes using the authentication middleware (verifyJWT).
 
-[ ] Automated Tests & Bruno API Collection
+[x] Automated Tests & Bruno API Collection
 
 Unit Tests (tests/unit/media.controller.test.js): Write unit tests using Jest covering media fetching, uploading, and deletion logic.
 
