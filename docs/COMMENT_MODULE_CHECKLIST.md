@@ -20,7 +20,7 @@ bulkDeleteComments: Handle batch/bulk deletion of multiple comments simultaneous
 
 sendReply: Handle sending and storing author replies or dispatching notification emails to the commenter.
 
-[ ] API Routes Configuration (src/routes/comment.routes.js)
+[x] API Routes Configuration (src/routes/comment.routes.js)
 
 Set up /api/comments endpoints and connect them securely with the comment controller methods.
 

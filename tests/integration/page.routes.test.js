@@ -3,7 +3,6 @@ import { jest } from "@jest/globals";
 import request from "supertest";
 import express from "express";
 
-// প্রথমে মডেলটি মক করে নিতে হবে
 jest.unstable_mockModule("../../src/models/Page.model.js", () => ({
     default: {
         create: jest.fn(),
@@ -14,7 +13,6 @@ jest.unstable_mockModule("../../src/models/Page.model.js", () => ({
     },
 }));
 
-// মক করার পর রাউট এবং মডেল इम्पोर्ट করতে হবে
 const pageRoutes = (await import("../../src/routes/page.routes.js")).default;
 const Page = (await import("../../src/models/Page.model.js")).default;
 
