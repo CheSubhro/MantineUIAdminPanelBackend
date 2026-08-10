@@ -26,7 +26,7 @@ logout: Handle logout logic (typically handled client-side by token removal, or 
 
 Create a JWT verification middleware to protect private routes and extract user info (req.user).
 
-[ ] API Routes Configuration (src/routes/auth.routes.js)
+[x] API Routes Configuration (src/routes/auth.routes.js)
 
 Set up endpoints: /api/auth/register, /api/auth/login, /api/auth/profile, /api/auth/update, and /api/auth/delete.
 
