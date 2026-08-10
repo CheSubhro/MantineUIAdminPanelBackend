@@ -22,8 +22,10 @@ Set up /api/users endpoints (GET, POST, PUT/PATCH, DELETE) and connect them secu
 
 Apply authentication and role-based access control (RBAC) middleware (e.g., admin-only access for user creation/deletion).
 
-[ ] Automated Tests & Bruno API Collection
+[x] Automated Tests & Bruno API Collection
 
-Tests (src/tests/user.test.js): Write unit and integration tests using Jest and Supertest covering all user CRUD endpoints.
+Integration Tests (tests/integration/user.routes.test.js): Written automated integration tests using Jest and Supertest covering all user CRUD endpoints.
+
+Unit Tests (tests/unit/user.controller.test.js): Written automated unit tests using Jest covering user creation, error handling, and controller logic.
 
 Bruno API Collection (bruno-collections/users/*.bru): Prepare collection files for the user management API endpoints.
