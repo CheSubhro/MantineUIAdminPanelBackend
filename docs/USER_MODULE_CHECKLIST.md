@@ -1,6 +1,6 @@
 
 User Management Module - Backend Checklist
-[ ] Database Model Creation (src/models/User.model.js)
+[x] Database Model Creation (src/models/User.model.js)
 
 Define Mongoose schema including fields: name, email, password (hashed with bcrypt), role (enum: ['Admin', 'Manager', 'User'], etc.), and status (enum: ['Active', 'Inactive']).
 

@@ -1,94 +1,134 @@
 
-import { asyncHandler } from '../utils/AsyncHandler.js'
-import { ApiError } from '../utils/ApiError.js'
-import HttpStatus from '../utils/HttpStatus.js'
-import { ApiResponse } from '../utils/ApiResponse.js'
-import { User } from '../models/User.model.js'
-import { uploadOnCloudinary }  from '../utils/Cloudinary.js'
-import { lowercase } from '../utils/StringUtils.js'
+// import { asyncHandler } from '../utils/AsyncHandler.js'
+// import { ApiError } from '../utils/ApiError.js'
+// import HttpStatus from '../utils/HttpStatus.js'
+// import { ApiResponse } from '../utils/ApiResponse.js'
+// import { uploadOnCloudinary }  from '../utils/Cloudinary.js'
+// import { lowercase } from '../utils/StringUtils.js'
 
 
-const registerUser = asyncHandler ( async (req,res) =>{
+import User from "../models/User.model.js";
+import bcrypt from "bcrypt";
 
-    // TODO:
-    // get user details from frontend
-    // validation - not empty
-    // check if user already exists: username, email
-    // check for images, check for avatar
-    // upload them to cloudinary, avatar
-    // create user object - create entry in db
-    // remove password and refresh token field from response
-    // check for user creation
-    // return res
+// Get All Users (with Search & Filter by name, email, or role)
+export const getAllUsers = async (req, res) => {
+    try {
+        const { search, role, status } = req.query;
+        let query = {};
 
-    const {fullName, email, username, password } = req.body
-    //console.log("email: ", email);
+        if (search) {
+            const searchRegex = new RegExp(search, "i");
+            query.$or = [
+                { name: searchRegex },
+                { email: searchRegex },
+            ];
+        }
 
-    if (
-        [fullName, email, username, password].some((field) => field?.trim() === "")
-    ) {
-        throw new ApiError(HttpStatus.BAD_REQUEST, "All fields are required");
+        if (role && role !== "All") {
+            query.role = role;
+        }
+
+        if (status && status !== "All") {
+            query.status = status;
+        }
+
+        const users = await User.find(query).select("-password").sort({ createdAt: -1 });
+
+        res.status(200).json({
+            success: true,
+            count: users.length,
+            data: users,
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
     }
+};
 
-    const existedUser = await User.findOne({
-        $or: [{ username }, { email }]
-    })
+// Create User (Registration, password hashing, and input validation)
+export const createUser = async (req, res) => {
+    try {
+        const { name, email, password, role, status } = req.body;
 
-    if (existedUser) {
-        throw new ApiError(HttpStatus.CONFLICT, "User with email or username already exists")
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            return res.status(400).json({ success: false, message: "Email is already in use." });
+        }
+
+        const saltRounds = 10;
+        const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+        const newUser = await User.create({
+            name,
+            email,
+            password: hashedPassword,
+            role: role || "User",
+            status: status || "Active",
+        });
+
+        const userResponse = newUser.toObject();
+        delete userResponse.password;
+
+        res.status(201).json({
+            success: true,
+            message: "User created successfully.",
+            data: userResponse,
+        });
+    } catch (error) {
+        res.status(400).json({ success: false, message: error.message });
     }
+};
 
-    // Convert username to lowercase
-    const lowercaseUsername = lowercase(username);
+// Update User Details (name, email, role, status, or password)
+export const updateUser = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const updateData = { ...req.body };
 
-    //console.log(req.files);
+        if (updateData.password) {
+            const saltRounds = 10;
+            updateData.password = await bcrypt.hash(updateData.password, saltRounds);
+        }
 
-    const avatarLocalPath = req.files?.avatar[0]?.path;
-    //const coverImageLocalPath = req.files?.coverImage[0]?.path;
+        const updatedUser = await User.findByIdAndUpdate(
+            id,
+            updateData,
+            { new: true, runValidators: true }
+        ).select("-password");
 
-    let coverImageLocalPath;
-    if (req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length > 0) {
-        coverImageLocalPath = req.files.coverImage[0].path
+        if (!updatedUser) {
+            return res.status(404).json({ success: false, message: "User not found." });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "User updated successfully.",
+            data: updatedUser,
+        });
+    } catch (error) {
+        res.status(400).json({ success: false, message: error.message });
     }
+};
 
-    if (!avatarLocalPath) {
-        throw new ApiError(HttpStatus.BAD_REQUEST, "Avatar file is required")
+// Delete Single User by ID
+export const deleteUser = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const deletedUser = await User.findByIdAndDelete(id);
+
+        if (!deletedUser) {
+            return res.status(404).json({ success: false, message: "User not found." });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "User deleted successfully.",
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
     }
-
-    const avatar = await uploadOnCloudinary(avatarLocalPath)
-    const coverImage = await uploadOnCloudinary(coverImageLocalPath)
-
-    if (!avatar) {
-        throw new ApiError(HttpStatus.BAD_REQUEST, "Avatar file is required")
-    }
-
-    const user = await User.create({
-        fullName,
-        avatar: avatar.url,
-        coverImage: coverImage?.url || "",
-        email, 
-        password,
-        username: lowercaseUsername
-    })
-
-    const createdUser = await User.findById(user._id).select(
-        "-password -refreshToken"
-    )
-
-    if (!createdUser) {
-        throw new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, "Something went wrong while registering the user")
-    }
-
-    return res.status(HttpStatus.CREATED).json(
-        new ApiResponse(HttpStatus.OK, createdUser, "User registered Successfully")
-    )
+};
 
 
-})
-
-export {
-    registerUser
-}
 
 
 
