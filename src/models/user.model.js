@@ -1,5 +1,6 @@
 
 import mongoose from "mongoose";
+import bcrypt from "bcrypt";
 
 const userSchema = new mongoose.Schema(
     {
@@ -9,13 +10,22 @@ const userSchema = new mongoose.Schema(
             trim: true,
             minlength: [2, "Name must be at least 2 characters long"],
         },
+        username: {
+            type: String,
+            required: [true, "Username is required"],
+            unique: true,
+            trim: true,
+            lowercase: true,
+            index: true,
+            minlength: [3, "Username must be at least 3 characters long"],
+        },
         email: {
             type: String,
             required: [true, "Email is required"],
-            unique: true, 
+            unique: true,
             trim: true,
             lowercase: true,
-            index: true, 
+            index: true,
             match: [
                 /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/,
                 "Please provide a valid email address",
@@ -43,6 +53,20 @@ const userSchema = new mongoose.Schema(
         timestamps: true,
     }
 );
+
+// Pre-save hook to hash password before saving to database
+userSchema.pre("save", async function (next) {
+    // Only hash the password if it has been modified (or is new)
+    if (!this.isModified("password")) return next();
+
+    try {
+        const salt = await bcrypt.genSalt(10);
+        this.password = await bcrypt.hash(this.password, salt);
+        next();
+    } catch (error) {
+        next(error);
+    }
+});
 
 const User = mongoose.model("User", userSchema);
 
