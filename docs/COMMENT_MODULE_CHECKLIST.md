@@ -26,8 +26,10 @@ Set up /api/comments endpoints and connect them securely with the comment contro
 
 Apply authorization or admin-only middleware for status updates and deletions.
 
-[ ] Automated Tests & Bruno API Collection
+[x] Automated Tests & Bruno API Collection
 
-Tests (src/tests/comment.test.js): Write automated unit and integration tests using Jest and Supertest covering all endpoints (GET, PATCH/PUT for status updates, DELETE, and reply actions).
+Integration Tests (tests/integration/comment.routes.test.js): Written automated integration tests using Jest and Supertest covering all endpoints (GET, POST, PATCH, and DELETE actions).
+
+Unit Tests (tests/unit/comment.controller.test.js): Written automated unit tests using Jest covering controller methods like creation, status updates, and error handling.
 
 Bruno API Collection (bruno-collections/comments/*.bru): Prepare the respective .bru request collection files for the comment module.

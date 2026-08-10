@@ -1,5 +1,6 @@
 
 import Comment from "../models/Comment.model.js";
+import sendEmail from "../utils/Email.js";
 
 // Get All Comments (with Search & Status Filter)
 export const getAllComments = async (req, res) => {
@@ -132,22 +133,39 @@ export const bulkDeleteComments = async (req, res) => {
     }
 };
 
-// Send Reply (Note: Can be expanded to include email notification)
+// Send Reply to Comment & Email Notification
 export const sendReply = async (req, res) => {
     try {
         const { id } = req.params;
         const { replyContent } = req.body;
 
-        // এখানে আপনি চাইলে Email Service (Nodemailer) ইন্টিগ্রেট করতে পারেন
-        const comment = await Comment.findByIdAndUpdate(
-            id,
-            { $push: { replies: replyContent } }, // যদি স্কিমাতে replies ফিল্ড থাকে
-            { new: true }
-        );
+        if (!replyContent) {
+            return res.status(400).json({ success: false, message: "Reply content is required." });
+        }
+
+        // কমেন্ট খুঁজে বের করুন যাতে ইউজারের ইমেইল পাওয়া যায়
+        const comment = await Comment.findById(id);
+        if (!comment) {
+            return res.status(404).json({ success: false, message: "Comment not found." });
+        }
+
+        // রিপ্লাই যুক্ত করুন
+        comment.replies.push({ replyContent });
+        await comment.save();
+
+        // কমেন্টকারীকে ইমেইল নোটিফিকেশন পাঠান
+        try {
+            const subject = `New reply on your comment regarding "${comment.postTitle || 'our post'}"`;
+            const body = `Hi ${comment.author},\n\nAdmin has replied to your comment:\n\n"${replyContent}"\n\nThank you for engaging with us!`;
+            
+            await sendEmail(comment.email, subject, body);
+        } catch (emailError) {
+            console.error("Email sending failed:", emailError.message);
+        }
 
         res.status(200).json({
             success: true,
-            message: "Reply sent successfully.",
+            message: "Reply sent and notification email dispatched successfully.",
             data: comment,
         });
     } catch (error) {

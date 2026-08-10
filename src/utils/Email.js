@@ -1,23 +1,26 @@
 
-// npm i nodemailer
-
-import nodemailer from 'nodemailer';
+import nodemailer from "nodemailer";
 
 // Send an email
 const sendEmail = async (to, subject, body) => {
+    const transporter = nodemailer.createTransport({
+        host: process.env.EMAIL_HOST || "smtp.gmail.com",
+        port: process.env.EMAIL_PORT || 587,
+        secure: false, // true for 465, false for other ports
+        auth: {
+            user: process.env.EMAIL_USER, 
+            pass: process.env.EMAIL_PASS, 
+        },
+    });
 
-  const transporter = nodemailer.createTransport({
-    // configure transporter
-  });
+    const mailOptions = {
+        from: `"Blog Admin" <${process.env.EMAIL_USER}>`,
+        to: to,
+        subject: subject,
+        text: body,
+    };
 
-  const mailOptions = {
-    from: 'your@email.com',
-    to: to,
-    subject: subject,
-    text: body
-  };
-
-  await transporter.sendMail(mailOptions);
+    await transporter.sendMail(mailOptions);
 };
 
 export default sendEmail;
