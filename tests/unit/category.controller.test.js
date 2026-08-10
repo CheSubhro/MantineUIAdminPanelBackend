@@ -1,7 +1,7 @@
 
 import { jest } from "@jest/globals";
 
-jest.unstable_mockModule("../../src/models/Post.model.js", () => ({
+jest.unstable_mockModule("../../src/models/Category.model.js", () => ({
     default: {
         create: jest.fn(),
     },
@@ -9,15 +9,18 @@ jest.unstable_mockModule("../../src/models/Post.model.js", () => ({
 
 jest.unstable_mockModule("../../src/utils/Cloudinary.js", () => ({
     uploadOnCloudinary: jest.fn().mockResolvedValue({
-        secure_url: "https://res.cloudinary.com/test/image.jpg",
+        secure_url: "https://res.cloudinary.com/test/category-image.jpg",
+        public_id: "category_test_id",
     }),
     deleteFromCloudinary: jest.fn().mockResolvedValue(true),
 }));
 
-const postController = await import("../../src/controllers/post.controller.js");
-const Post = (await import("../../src/models/Post.model.js")).default;
+const categoryController = await import(
+    "../../src/controllers/category.controller.js"
+);
+const Category = (await import("../../src/models/Category.model.js")).default;
 
-describe("Post Controller Unit Tests", () => {
+describe("Category Controller Unit Tests", () => {
     let req, res;
 
     beforeEach(() => {
@@ -29,16 +32,16 @@ describe("Post Controller Unit Tests", () => {
         jest.clearAllMocks();
     });
 
-    it("should create a new post", async () => {
+    it("should create a new category", async () => {
         req.body = {
-            title: "Test Post",
-            slug: "test-post",
-            category: "Technology",
+            name: "Travel",
+            slug: "travel",
+            description: "Travel guides",
         };
 
-        Post.create.mockResolvedValue(req.body);
+        Category.create.mockResolvedValue(req.body);
 
-        await postController.createPost(req, res);
+        await categoryController.createCategory(req, res);
 
         expect(res.status).toHaveBeenCalledWith(201);
         expect(res.json).toHaveBeenCalledWith(
@@ -48,11 +51,11 @@ describe("Post Controller Unit Tests", () => {
         );
     });
 
-    it("should handle error when creating a post fails", async () => {
-        req.body = { title: "Test" };
-        Post.create.mockRejectedValue(new Error("Database Error"));
+    it("should handle error when creating a category fails", async () => {
+        req.body = { name: "Travel" };
+        Category.create.mockRejectedValue(new Error("Database Error"));
 
-        await postController.createPost(req, res);
+        await categoryController.createCategory(req, res);
 
         expect(res.status).toHaveBeenCalledWith(400);
         expect(res.json).toHaveBeenCalledWith(

@@ -61,21 +61,21 @@ Category Module Implementation Checklist
 [x] Clean up images from Cloudinary in bulk.
 
 3. API Routes Configuration (src/routes/category.routes.js)
-[ ] Set up Express Router.
+[x] Set up Express Router.
 
-[ ] Configure endpoints:
+[x] Configure endpoints:
 
-[ ] GET /api/categories (Fetch all with filters)
+[x] GET /api/categories (Fetch all with filters)
 
-[ ] POST /api/categories (Create category with image upload middleware)
+[x] POST /api/categories (Create category with image upload middleware)
 
-[ ] PUT /api/categories/:id (Update category)
+[x] PUT /api/categories/:id (Update category)
 
-[ ] DELETE /api/categories/:id (Delete single category)
+[x] DELETE /api/categories/:id (Delete single category)
 
-[ ] DELETE /api/categories/bulk (Bulk delete categories)
+[x] DELETE /api/categories/bulk (Bulk delete categories)
 
-[ ] Secure routes with authentication and role-based access control (RBAC) middleware where applicable.
+[] Secure routes with authentication and role-based access control (RBAC) middleware where applicable.
 
 4. Testing & API Collections
 [ ] Unit Tests (tests/unit/category.controller.test.js):
