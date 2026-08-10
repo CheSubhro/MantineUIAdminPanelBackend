@@ -6,6 +6,11 @@ import { ApiError } from "../utils/ApiError.js";
 import HttpStatus from "../utils/HttpStatus.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { generateTokens } from "../utils/generateToken.js";
+import {
+    cookieOptions,
+    refreshCookieOptions,
+    clearCookieOptions,
+} from "../utils/Constants.js";
 
 // Register Handler
 export const register = asyncHandler(async (req, res) => {
@@ -42,7 +47,7 @@ export const register = asyncHandler(async (req, res) => {
         );
 });
 
-// Login Handler (Supports identifier as either username or email)
+// Login Handler (Supports identifier as either username or email and sets cookies)
 export const login = asyncHandler(async (req, res) => {
     const { identifier, password } = req.body; // identifier can be username or email
 
@@ -82,10 +87,12 @@ export const login = asyncHandler(async (req, res) => {
 
     return res
         .status(HttpStatus.OK || 200)
+        .cookie("accessToken", accessToken, cookieOptions)
+        .cookie("refreshToken", refreshToken, refreshCookieOptions)
         .json(
             new ApiResponse(
                 HttpStatus.OK || 200,
-                { user: userResponse, accessToken, refreshToken },
+                { user: userResponse },
                 "Login successful."
             )
         );
@@ -143,7 +150,7 @@ export const updateProfile = asyncHandler(async (req, res) => {
         );
 });
 
-// Delete Account Handler
+// Delete Account Handler (Clears cookies on account deletion)
 export const deleteAccount = asyncHandler(async (req, res) => {
     const deletedUser = await User.findByIdAndDelete(req.user.id);
 
@@ -153,6 +160,8 @@ export const deleteAccount = asyncHandler(async (req, res) => {
 
     return res
         .status(HttpStatus.OK || 200)
+        .clearCookie("accessToken", clearCookieOptions)
+        .clearCookie("refreshToken", clearCookieOptions)
         .json(
             new ApiResponse(
                 HttpStatus.OK || 200,
@@ -162,10 +171,12 @@ export const deleteAccount = asyncHandler(async (req, res) => {
         );
 });
 
-// Logout Handler (Client-side handles token removal; server can clear cookies if used)
+// Logout Handler (Clears cookies)
 export const logout = asyncHandler(async (req, res) => {
     return res
         .status(HttpStatus.OK || 200)
+        .clearCookie("accessToken", clearCookieOptions)
+        .clearCookie("refreshToken", clearCookieOptions)
         .json(
             new ApiResponse(
                 HttpStatus.OK || 200,

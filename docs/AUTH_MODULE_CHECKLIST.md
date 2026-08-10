@@ -22,7 +22,7 @@ deleteAccount: Allow users to delete their account permanently.
 
 logout: Handle logout logic (typically handled client-side by token removal, or server-side token blacklisting if applicable).
 
-[ ] Authentication Middleware (src/middlewares/auth.middleware.js)
+[x] Authentication Middleware (src/middlewares/auth.middleware.js)
 
 Create a JWT verification middleware to protect private routes and extract user info (req.user).
 
