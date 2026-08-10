@@ -1,11 +1,11 @@
 meta {
-  name: Logout
+  name: Get Profile
   type: http
-  seq: 3
+  seq: 4
 }
 
-post {
-  url: {{baseUrl}}/auth/logout
+get {
+  url: {{baseUrl}}/auth/profile
   body: none
   auth: inherit
 }
