@@ -1,72 +1,49 @@
-import mongoose, { Schema } from "mongoose";
-import bcrypt from "bcrypt";
 
-// Define the schema for the user
-const userSchema = new Schema(
+import mongoose from "mongoose";
+
+const userSchema = new mongoose.Schema(
     {
-        // Username field
-        username: {
+        name: {
             type: String,
-            required: true,
-            unique: true,
-            lowercase: true,
+            required: [true, "Name is required"],
             trim: true,
-            index: true
+            minlength: [2, "Name must be at least 2 characters long"],
         },
-        // Email field
         email: {
             type: String,
-            required: true,
+            required: [true, "Email is required"],
             unique: true,
-            lowercase: true,
-            trim: true
-        },
-        // Full name field
-        fullName: {
-            type: String,
-            required: true,
             trim: true,
-            index: true
+            lowercase: true,
+            index: true,
+            match: [
+                /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/,
+                "Please provide a valid email address",
+            ],
         },
-        // Avatar field (cloudinary URL)
-        avatar: {
-            type: String,
-            required: true
-        },
-        // Cover image field (cloudinary URL)
-        coverImage: {
-            type: String
-        },
-        // Watch history field (array of Video references)
-        watchHistory: [
-            {
-                type: Schema.Types.ObjectId,
-                ref: "Video"
-            }
-        ],
-        // Password field (hashed)
         password: {
             type: String,
-            required: [true, 'Password is required']
+            required: [true, "Password is required"],
+            minlength: [6, "Password must be at least 6 characters long"],
         },
-        // Refresh token field
-        refreshToken: {
-            type: String
-        }
+        role: {
+            type: String,
+            enum: ["Admin", "Manager", "User"],
+            default: "User",
+            index: true,
+        },
+        status: {
+            type: String,
+            enum: ["Active", "Inactive"],
+            default: "Active",
+            index: true,
+        },
     },
-    // Additional options
     {
-        timestamps: true // Adds createdAt and updatedAt fields
+        timestamps: true,
     }
 );
 
-// Middleware function to hash the password before saving
-userSchema.pre("save", async function (next) {
-    if (!this.isModified("password")) return next();
+const User = mongoose.model("User", userSchema);
 
-    this.password = await bcrypt.hash(this.password, 10);
-    next();
-});
-
-// Create and export the User model
-export const User = mongoose.model("User", userSchema);
+export default User;

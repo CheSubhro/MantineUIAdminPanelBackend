@@ -3,7 +3,7 @@ import { asyncHandler } from '../utils/AsyncHandler.js'
 import { ApiError } from '../utils/ApiError.js'
 import HttpStatus from '../utils/HttpStatus.js'
 import { ApiResponse } from '../utils/ApiResponse.js'
-import { User } from '../models/user.model.js'
+import { User } from '../models/User.model.js'
 import { uploadOnCloudinary }  from '../utils/Cloudinary.js'
 import { lowercase } from '../utils/StringUtils.js'
 
