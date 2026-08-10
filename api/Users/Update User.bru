@@ -5,13 +5,15 @@ meta {
 }
 
 patch {
-  url: {{baseUrl}}/users/:id
-  body: none
+  url: {{baseUrl}}/users/6a799e42d71536a770d6658a
+  body: json
   auth: inherit
 }
 
-params:path {
-  id: 
+body:json {
+  {
+    "name":"John Doe"
+  }
 }
 
 settings {
