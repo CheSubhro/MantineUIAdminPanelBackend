@@ -1,23 +1,25 @@
 
-import { Router } from "express";
-import { upload } from "../middlewares/multer.middleware.js";
-import { registerUser } from "../controllers/user.controller.js";
+// import { upload } from "../middlewares/multer.middleware.js";
 
+import express from "express";
+import {
+    getAllUsers,
+    createUser,
+    updateUser,
+    deleteUser,
+} from "../controllers/user.controller.js";
 
-const router = Router()
+const router = express.Router();
 
-router.route("/register").post(
-    upload.fields([
-        {
-            name: "avatar",
-            maxCount: 1
-        },
-        {
-            name: "coverImage",
-            maxCount: 1
-        }
-    ]),
-    registerUser
-)
+// Get all users & Create a new user
+router.route("/")
+    .get(getAllUsers)
+    .post(createUser);
 
-export default router
+// Update a user & Delete a user by ID
+router.route("/:id")
+    .put(updateUser)
+    .patch(updateUser)
+    .delete(deleteUser);
+
+export default router;

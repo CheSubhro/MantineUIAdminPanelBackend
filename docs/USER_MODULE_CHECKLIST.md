@@ -6,7 +6,7 @@ Define Mongoose schema including fields: name, email, password (hashed with bcry
 
 Set up unique constraints and indexing on the email field.
 
-[ ] Controller Logic (src/controllers/user.controller.js)
+[x] Controller Logic (src/controllers/user.controller.js)
 
 getAllUsers: Retrieve all users with search query support (filtering by name, email, or role).
 
