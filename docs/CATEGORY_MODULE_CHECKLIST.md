@@ -1,64 +1,64 @@
 
 Category Module Implementation Checklist
 1. Database Model Layer (src/models/Category.model.js)
-[ ] Define Mongoose Schema for Category.
+[x] Define Mongoose Schema for Category.
 
-[ ] name: String (Required, Trim, Unique)
+[x] name: String (Required, Trim, Unique)
 
-[ ] slug: String (Required, Unique, Lowercase, Indexed)
+[x] slug: String (Required, Unique, Lowercase, Indexed)
 
-[ ] description: String (Trim)
+[x] description: String (Trim)
 
-[ ] image: String (Image URL)
+[x] image: String (Image URL)
 
-[ ] imagePublicId: String (Cloudinary Public ID for deletion management)
+[x] imagePublicId: String (Cloudinary Public ID for deletion management)
 
-[ ] status: Enum ['Active', 'Inactive'] (Default: 'Active')
+[x] status: Enum ['Active', 'Inactive'] (Default: 'Active')
 
-[ ] postCount: Number (Default: 0)
+[x] postCount: Number (Default: 0)
 
-[ ] Enable timestamps: true (createdAt, updatedAt).
+[x] Enable timestamps: true (createdAt, updatedAt).
 
 2. Controller Layer (src/controllers/category.controller.js)
-[ ] Wrap controllers with asyncHandler.
+[x] Wrap controllers with asyncHandler.
 
-[ ] getAllCategories:
+[x] getAllCategories:
 
-[ ] Implement search support (name or slug).
+[x] Implement search support (name or slug).
 
-[ ] Implement status filtering (Active, Inactive, All).
+[x] Implement status filtering (Active, Inactive, All).
 
-[ ] Sort by recent updates (updatedAt: -1).
+[x] Sort by recent updates (updatedAt: -1).
 
-[ ] createCategory:
+[x] createCategory:
 
-[ ] Handle image upload via Cloudinary (uploadOnCloudinary).
+[x] Handle image upload via Cloudinary (uploadOnCloudinary).
 
-[ ] Handle duplicate slug errors (MongoDB Error code 11000).
+[x] Handle duplicate slug errors (MongoDB Error code 11000).
 
-[ ] Set default post count to 0.
+[x] Set default post count to 0.
 
-[ ] updateCategory:
+[x] updateCategory:
 
-[ ] Find existing category by ID.
+[x] Find existing category by ID.
 
-[ ] Handle new image replacement (upload new, delete old from Cloudinary).
+[x] Handle new image replacement (upload new, delete old from Cloudinary).
 
-[ ] Support partial updates (runValidators: true).
+[x] Support partial updates (runValidators: true).
 
-[ ] deleteCategory:
+[x] deleteCategory:
 
-[ ] Find and delete single category by ID.
+[x] Find and delete single category by ID.
 
-[ ] Clean up associated Cloudinary image if exists.
+[x] Clean up associated Cloudinary image if exists.
 
-[ ] bulkDeleteCategories:
+[x] bulkDeleteCategories:
 
-[ ] Validate array of IDs.
+[x] Validate array of IDs.
 
-[ ] Delete multiple documents using deleteMany.
+[x] Delete multiple documents using deleteMany.
 
-[ ] Clean up images from Cloudinary in bulk.
+[x] Clean up images from Cloudinary in bulk.
 
 3. API Routes Configuration (src/routes/category.routes.js)
 [ ] Set up Express Router.
