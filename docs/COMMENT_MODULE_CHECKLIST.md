@@ -1,6 +1,6 @@
 
 Comment Management Module - Backend Checklist
-[ ] Database Model Creation (src/models/Comment.model.js)
+[x] Database Model Creation (src/models/Comment.model.js)
 
 Define Mongoose schema including fields: author, email, content, postTitle (or postId reference linking to Post model), status (enum: ['approved', 'pending', 'spam']), and timestamp/date.
 
