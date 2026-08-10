@@ -32,8 +32,10 @@ Set up endpoints: /api/auth/register, /api/auth/login, /api/auth/profile, /api/a
 
 Connect the routes with the authentication controller and protect private routes with the auth middleware.
 
-[ ] Automated Tests & Bruno API Collection
+[x] Automated Tests & Bruno API Collection
 
-Tests (src/tests/auth.test.js): Write unit and integration tests using Jest and Supertest covering registration, login, profile updates, and token verification.
+Unit Tests (tests/unit/auth.controller.test.js): Written automated unit tests using Jest covering user registration, login, profile retrieval, error handling, and controller logic.
+
+Integration Tests (tests/integration/auth.routes.test.js): Written automated integration tests using Jest and Supertest covering registration, login routes, and token verification with cookie parsing support.
 
 Bruno API Collection (bruno-collections/auth/*.bru): Prepare collection files for all authentication API requests.
