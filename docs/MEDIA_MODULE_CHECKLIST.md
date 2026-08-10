@@ -20,7 +20,7 @@ Add timestamps (createdAt, updatedAt) to track upload dates.
 
 Implement prevention check against OverwriteModelError using mongoose.models.Media || mongoose.model("Media", mediaSchema).
 
-[ ] Media Controller Logic (src/controllers/media.controller.js)
+[x] Media Controller Logic (src/controllers/media.controller.js)
 
 getMediaFiles: Fetch all uploaded media files from MongoDB sorted by newest first.
 
