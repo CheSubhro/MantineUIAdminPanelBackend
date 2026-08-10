@@ -16,7 +16,7 @@ updateUser: Update existing user details (name, email, role, status, or password
 
 deleteUser: Single user deletion by ID.
 
-[ ] API Routes Configuration (src/routes/user.routes.js)
+[x] API Routes Configuration (src/routes/user.routes.js)
 
 Set up /api/users endpoints (GET, POST, PUT/PATCH, DELETE) and connect them securely with the user controller methods.
 
