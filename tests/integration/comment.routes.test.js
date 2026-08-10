@@ -7,6 +7,7 @@ jest.unstable_mockModule("../../src/models/Comment.model.js", () => ({
     default: {
         create: jest.fn(),
         find: jest.fn(),
+        findById: jest.fn(),
         findByIdAndUpdate: jest.fn(),
         findByIdAndDelete: jest.fn(),
         deleteMany: jest.fn(),
@@ -90,12 +91,16 @@ describe("Comment API Integration Tests (Mocked)", () => {
     });
 
     it("should send a reply to a comment successfully", async () => {
-        const repliedMockComment = {
+        const mockCommentInstance = {
             _id: "60c72b2f9b1d8b2d88f32a1a",
-            replies: [{ replyContent: "Thank you for your feedback!" }],
+            author: "John Doe",
+            email: "john@example.com",
+            postTitle: "React Guide",
+            replies: [],
+            save: jest.fn().mockResolvedValue(true),
         };
 
-        Comment.findByIdAndUpdate.mockResolvedValue(repliedMockComment);
+        Comment.findById.mockResolvedValue(mockCommentInstance);
 
         const res = await request(app)
             .post(`/api/comments/60c72b2f9b1d8b2d88f32a1a`)
@@ -103,7 +108,7 @@ describe("Comment API Integration Tests (Mocked)", () => {
 
         expect(res.statusCode).toEqual(200);
         expect(res.body.success).toBe(true);
-        expect(res.body.data.replies.length).toBe(1);
+        expect(res.body.message).toContain("Reply sent");
     });
 
     it("should delete a single comment successfully", async () => {

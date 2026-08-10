@@ -6,8 +6,14 @@ meta {
 
 delete {
   url: {{baseUrl}}/comments/bulk
-  body: none
+  body: json
   auth: inherit
+}
+
+body:json {
+  {
+      "ids": ["6a796600b02aa498eee26584", "6a7965f6b02aa498eee26582"]
+  }
 }
 
 settings {
