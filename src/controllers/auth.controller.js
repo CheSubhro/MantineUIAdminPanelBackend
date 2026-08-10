@@ -161,3 +161,16 @@ export const deleteAccount = asyncHandler(async (req, res) => {
             )
         );
 });
+
+// Logout Handler (Client-side handles token removal; server can clear cookies if used)
+export const logout = asyncHandler(async (req, res) => {
+    return res
+        .status(HttpStatus.OK || 200)
+        .json(
+            new ApiResponse(
+                HttpStatus.OK || 200,
+                null,
+                "Logged out successfully."
+            )
+        );
+});

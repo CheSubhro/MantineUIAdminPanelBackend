@@ -1,6 +1,6 @@
 
 Authentication & Authorization Module - Backend Checklist
-[ ] Database Model Creation (src/models/User.model.js)
+[x] Database Model Creation (src/models/User.model.js)
 
 Define Mongoose schema including fields: username, email, password (hashed using bcrypt), name, and profile details.
 
@@ -8,7 +8,7 @@ Set up unique constraints and indexes for username and email.
 
 Add a pre-save hook to automatically hash user passwords securely before storing them in MongoDB.
 
-[ ] Controller Logic (src/controllers/auth.controller.js)
+[x] Controller Logic (src/controllers/auth.controller.js)
 
 register: Handle new user registration, check if username/email already exists, hash the password, and save the user.
 
