@@ -1,0 +1,93 @@
+
+import Media from "../models/Media.model.js";
+import {
+    uploadOnCloudinary,
+    deleteFromCloudinary,
+} from "../utils/Cloudinary.js";
+import { asyncHandler } from "../utils/AsyncHandler.js";
+import { ApiError } from "../utils/ApiError.js";
+import HttpStatus from "../utils/HttpStatus.js";
+import { ApiResponse } from "../utils/ApiResponse.js";
+
+// Get All Media Files (Sorted by newest first)
+export const getMediaFiles = asyncHandler(async (req, res) => {
+    const mediaFiles = await Media.find().sort({ createdAt: -1 });
+
+    return res
+        .status(HttpStatus.OK || 200)
+        .json(
+            new ApiResponse(
+                HttpStatus.OK || 200,
+                mediaFiles,
+                "Media files fetched successfully.",
+                { count: mediaFiles.length }
+            )
+        );
+});
+
+// Upload Media (Cloudinary Integration & Save to MongoDB)
+export const uploadMedia = asyncHandler(async (req, res) => {
+    if (!req.file) {
+        throw new ApiError(
+            HttpStatus.BAD_REQUEST || 400,
+            "No file provided for upload."
+        );
+    }
+
+    const cloudinaryResponse = await uploadOnCloudinary(req.file.path);
+
+    if (!cloudinaryResponse || !cloudinaryResponse.secure_url) {
+        throw new ApiError(
+            HttpStatus.BAD_REQUEST || 400,
+            "Failed to upload media to Cloudinary."
+        );
+    }
+
+    const newMedia = await Media.create({
+        name: req.file.originalname,
+        url: cloudinaryResponse.secure_url,
+        size: req.file.size,
+        publicId: cloudinaryResponse.public_id,
+        uploadedBy: req.user?._id, // Assuming authentication middleware populates req.user
+    });
+
+    return res
+        .status(HttpStatus.CREATED || 201)
+        .json(
+            new ApiResponse(
+                HttpStatus.CREATED || 201,
+                newMedia,
+                "Media uploaded successfully."
+            )
+        );
+});
+
+// Delete Media File (MongoDB & Cloudinary Cleanup)
+export const deleteMedia = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+
+    const media = await Media.findById(id);
+
+    if (!media) {
+        throw new ApiError(
+            HttpStatus.NOT_FOUND || 404,
+            "Media file not found."
+        );
+    }
+
+    if (media.publicId) {
+        await deleteFromCloudinary(media.publicId);
+    }
+
+    await Media.findByIdAndDelete(id);
+
+    return res
+        .status(HttpStatus.OK || 200)
+        .json(
+            new ApiResponse(
+                HttpStatus.OK || 200,
+                { id },
+                "Media file has been removed successfully."
+            )
+        );
+});
