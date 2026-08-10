@@ -6,7 +6,7 @@ Define Mongoose schema including fields: author, email, content, postTitle (or p
 
 Set up indexing on fields like status and postId to optimize filtering and retrieval queries.
 
-[ ] Controller Logic (src/controllers/comment.controller.js)
+[x] Controller Logic (src/controllers/comment.controller.js)
 
 getAllComments: Retrieve comments supporting search queries (filtering by author name, content, or post title) and status filtering (all, approved, pending, spam).
 
