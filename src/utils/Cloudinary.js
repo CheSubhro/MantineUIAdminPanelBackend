@@ -14,6 +14,7 @@ export const uploadOnCloudinary = async (localFilePath) => {
 
         const response = await cloudinary.uploader.upload(localFilePath, {
             resource_type: "image",
+            timeout: 120000,
         });
 
         if (fs.existsSync(localFilePath)) {
@@ -39,6 +40,7 @@ export const deleteFromCloudinary = async (publicId) => {
         const response = await cloudinary.uploader.destroy(publicId, {
             resource_type: "image",
             invalidate: true,
+            timeout: 60000,
         });
 
         console.log("Cloudinary delete response:", response);

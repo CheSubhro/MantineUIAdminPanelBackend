@@ -19,6 +19,7 @@ app.use(cookieParser())
 //routes import
 import authRouter from "./routes/auth.routes.js";
 import userRouter from './routes/user.routes.js';
+import categoriesRouter from "./routes/category.routes.js";
 import pageRouter from "./routes/page.routes.js";
 import postRouter from "./routes/post.routes.js";
 import commentsRouter from "./routes/comment.routes.js";
@@ -28,6 +29,7 @@ import analyticsRouter from "./routes/analytics.routes.js";
 //routes declaration
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/users", userRouter);
+app.use("/api/v1/categories", categoriesRouter);
 app.use("/api/v1/pages", pageRouter);
 app.use("/api/v1/posts", postRouter);
 app.use("/api/v1/comments", commentsRouter);

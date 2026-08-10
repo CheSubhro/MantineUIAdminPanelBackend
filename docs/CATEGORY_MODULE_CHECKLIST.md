@@ -78,22 +78,22 @@ Category Module Implementation Checklist
 [] Secure routes with authentication and role-based access control (RBAC) middleware where applicable.
 
 4. Testing & API Collections
-[ ] Unit Tests (tests/unit/category.controller.test.js):
+[x] Unit Tests (tests/unit/category.controller.test.js):
 
-[ ] Test category creation success and error flows (mocking Model and Cloudinary).
+[x] Test category creation success and error flows (mocking Model and Cloudinary).
 
-[ ] Test status filters and fetch logic.
+[x] Test status filters and fetch logic.
 
-[ ] Integration Tests (tests/integration/category.routes.test.js):
+[x] Integration Tests (tests/integration/category.routes.test.js):
 
-[ ] Test HTTP endpoints using Supertest.
+[x] Test HTTP endpoints using Supertest.
 
-[ ] Bruno API Collection (bruno-collections/categories/*.bru):
+[x] Bruno API Collection (bruno-collections/categories/*.bru):
 
-[ ] Get All Categories
+[x] Get All Categories
 
-[ ] Create Category
+[x] Create Category
 
-[ ] Update Category
+[x] Update Category
 
-[ ] Delete Category
+[x] Delete Category

@@ -51,10 +51,21 @@ export const createCategory = asyncHandler(async (req, res) => {
 
     if (req.file) {
         const cloudinaryResponse = await uploadOnCloudinary(req.file.path);
-        if (cloudinaryResponse) {
-            imageUrl = cloudinaryResponse.secure_url;
-            imagePublicId = cloudinaryResponse.public_id;
+
+        if (!cloudinaryResponse || !cloudinaryResponse.secure_url) {
+            throw new ApiError(
+                HttpStatus.BAD_REQUEST || 400,
+                "Failed to upload image to Cloudinary due to timeout or network issue."
+            );
         }
+
+        imageUrl = cloudinaryResponse.secure_url;
+        imagePublicId = cloudinaryResponse.public_id;
+    } else {
+        throw new ApiError(
+            HttpStatus.BAD_REQUEST || 400,
+            "Category image is required."
+        );
     }
 
     try {
@@ -115,7 +126,7 @@ export const updateCategory = asyncHandler(async (req, res) => {
         if (!cloudinaryResponse) {
             throw new ApiError(
                 HttpStatus.BAD_REQUEST || 400,
-                "Failed to upload new image."
+                "Failed to upload new image. Please check your internet connection."
             );
         }
 
@@ -181,7 +192,7 @@ export const deleteCategory = asyncHandler(async (req, res) => {
         );
 });
 
-// Bulk Delete Categories & Cloudinary Cleanup in Bulk
+// Bulk Delete Categories (Cloudinary Image Delete)
 export const bulkDeleteCategories = asyncHandler(async (req, res) => {
     const { ids } = req.body;
 
@@ -200,7 +211,7 @@ export const bulkDeleteCategories = asyncHandler(async (req, res) => {
         _id: { $in: ids },
     });
 
-    // Delete images from Cloudinary in bulk
+    // Delete images from Cloudinary sequentially (just like posts logic)
     for (const category of categoriesToDelete) {
         if (category.imagePublicId) {
             await deleteFromCloudinary(category.imagePublicId);
