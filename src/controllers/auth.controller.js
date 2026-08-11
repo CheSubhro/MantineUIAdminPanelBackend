@@ -222,7 +222,7 @@ export const getProfile = asyncHandler(async (req, res) => {
 
 // Update Profile Handler (With Cloudinary Image Replacement)
 export const updateProfile = asyncHandler(async (req, res) => {
-    
+
     const updateData = { ...req.body };
 
     delete updateData.role;
@@ -307,9 +307,22 @@ export const updateProfile = asyncHandler(async (req, res) => {
         );
 });
 
-// Delete Account Handler (Clears DB refreshToken & Cookies)
+// Delete Account Handler (Clears DB refreshToken, Cloudinary Images & Cookies)
 export const deleteAccount = asyncHandler(async (req, res) => {
-    await User.findByIdAndUpdate(req.user.id, { $unset: { refreshToken: 1 } });
+    const user = await User.findById(req.user.id);
+
+    if (!user) {
+        throw new ApiError(HttpStatus.NOT_FOUND || 404, "User not found.");
+    }
+
+    if (user.avatarPublicId) {
+        await deleteFromCloudinary(user.avatarPublicId);
+    }
+
+    if (user.coverImagePublicId) {
+        await deleteFromCloudinary(user.coverImagePublicId);
+    }
+
     const deletedUser = await User.findByIdAndDelete(req.user.id);
 
     if (!deletedUser) {
@@ -324,7 +337,7 @@ export const deleteAccount = asyncHandler(async (req, res) => {
             new ApiResponse(
                 HttpStatus.OK || 200,
                 null,
-                "Account deleted successfully."
+                "Account and associated images deleted successfully."
             )
         );
 });
