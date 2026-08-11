@@ -29,7 +29,15 @@ router.post("/refresh-token", refreshAccessToken);
 // ==================== Private / Protected Routes ====================
 // (Protected with verifyJWT middleware)
 router.get("/profile", verifyJWT, getProfile);
-router.put("/update", verifyJWT, updateProfile); // Alternatively, you can use PATCH
+router.put(
+    "/update",
+    verifyJWT,
+    upload.fields([
+        { name: "avatar", maxCount: 1 },
+        { name: "coverImage", maxCount: 1 },
+    ]),
+    updateProfile
+);
 router.delete("/delete", verifyJWT, deleteAccount);
 router.post("/logout", verifyJWT, logout);
 

@@ -40,43 +40,6 @@ export const getAllUsers = asyncHandler(async (req, res) => {
         );
 });
 
-// Create User (Registration, password hashing, and input validation)
-export const createUser = asyncHandler(async (req, res) => {
-    const { name, email, password, role, status } = req.body;
-
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-        throw new ApiError(
-            HttpStatus.BAD_REQUEST || 400,
-            "Email is already in use."
-        );
-    }
-
-    const saltRounds = 10;
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
-
-    const newUser = await User.create({
-        name,
-        email,
-        password: hashedPassword,
-        role: role || "User",
-        status: status || "Active",
-    });
-
-    const userResponse = newUser.toObject();
-    delete userResponse.password;
-
-    return res
-        .status(HttpStatus.CREATED || 201)
-        .json(
-            new ApiResponse(
-                HttpStatus.CREATED || 201,
-                userResponse,
-                "User created successfully."
-            )
-        );
-});
-
 // Update User Details (name, email, role, status, or password)
 export const updateUser = asyncHandler(async (req, res) => {
     const { id } = req.params;

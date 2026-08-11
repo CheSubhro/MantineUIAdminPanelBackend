@@ -6,14 +6,14 @@ meta {
 
 put {
   url: {{baseUrl}}/auth/update
-  body: json
+  body: multipartForm
   auth: inherit
 }
 
-body:json {
-  {
-      "name": "Tanvir Ahmed"
-  }
+body:multipart-form {
+  avatar: @file(C:\Users\CHE\Downloads\screencapture-localhost-5173-privacy-policy-2026-08-05-10_18_37.png) @contentType(image/png)
+  coverImage: @file(C:\Users\CHE\Downloads\screencapture-localhost-5173-settings-2026-08-05-10_19_22.png) @contentType(image/png)
+  name: Siltu
 }
 
 settings {

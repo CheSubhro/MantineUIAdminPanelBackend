@@ -50,8 +50,16 @@ const userSchema = new Schema(
             type: String,
             required: false,
         },
+        avatarPublicId: {
+            type: String,
+            required: false,
+        },
         // Cover image field (Cloudinary URL - Optional)
         coverImage: {
+            type: String,
+            required: false,
+        },
+        coverImagePublicId: {
             type: String,
             required: false,
         },

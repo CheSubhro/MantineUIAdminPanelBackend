@@ -13,7 +13,10 @@ import {
     clearCookieOptions,
 } from "../utils/Constants.js";
 
-import { uploadOnCloudinary } from "../utils/Cloudinary.js";
+import {
+    uploadOnCloudinary,
+    deleteFromCloudinary,
+} from "../utils/Cloudinary.js";
 
 // Register Handler (Fully Fixed with Cloudinary Integration)
 export const register = asyncHandler(async (req, res) => {
@@ -217,8 +220,9 @@ export const getProfile = asyncHandler(async (req, res) => {
         );
 });
 
-// Update Profile Handler
+// Update Profile Handler (With Cloudinary Image Replacement)
 export const updateProfile = asyncHandler(async (req, res) => {
+    
     const updateData = { ...req.body };
 
     delete updateData.role;
@@ -232,7 +236,7 @@ export const updateProfile = asyncHandler(async (req, res) => {
 
     if (updateData.email || updateData.username) {
         const existingConflict = await User.findOne({
-            _id: { $ne: req.user.id }, 
+            _id: { $ne: req.user.id },
             $or: [
                 ...(updateData.email ? [{ email: updateData.email }] : []),
                 ...(updateData.username
@@ -248,14 +252,49 @@ export const updateProfile = asyncHandler(async (req, res) => {
         }
     }
 
+    const existingUser = await User.findById(req.user.id);
+    if (!existingUser) {
+        throw new ApiError(HttpStatus.NOT_FOUND || 404, "User not found.");
+    }
+
+    // Avatar Upload & Old Avatar Delete
+    if (req.files && req.files.avatar && req.files.avatar[0]) {
+        const avatarLocalPath = req.files.avatar[0].path.replace(/\\/g, "/");
+        const avatarResponse = await uploadOnCloudinary(avatarLocalPath);
+
+        if (!avatarResponse) {
+            throw new ApiError(400, "Failed to upload new avatar.");
+        }
+
+        if (existingUser.avatarPublicId) {
+            await deleteFromCloudinary(existingUser.avatarPublicId);
+        }
+
+        updateData.avatar = avatarResponse.secure_url;
+        updateData.avatarPublicId = avatarResponse.public_id;
+    }
+
+    // Cover Image Upload & Old Cover Image Delete
+    if (req.files && req.files.coverImage && req.files.coverImage[0]) {
+        const coverLocalPath = req.files.coverImage[0].path.replace(/\\/g, "/");
+        const coverResponse = await uploadOnCloudinary(coverLocalPath);
+
+        if (!coverResponse) {
+            throw new ApiError(400, "Failed to upload new cover image.");
+        }
+
+        if (existingUser.coverImagePublicId) {
+            await deleteFromCloudinary(existingUser.coverImagePublicId);
+        }
+
+        updateData.coverImage = coverResponse.secure_url;
+        updateData.coverImagePublicId = coverResponse.public_id;
+    }
+
     const updatedUser = await User.findByIdAndUpdate(req.user.id, updateData, {
         new: true,
         runValidators: true,
     }).select("-password -refreshToken");
-
-    if (!updatedUser) {
-        throw new ApiError(HttpStatus.NOT_FOUND || 404, "User not found.");
-    }
 
     return res
         .status(HttpStatus.OK || 200)
