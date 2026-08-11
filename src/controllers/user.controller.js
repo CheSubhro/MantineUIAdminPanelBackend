@@ -1,10 +1,14 @@
 
-import User from "../models/User.model.js"
+import User from "../models/User.model.js";
 import bcrypt from "bcrypt";
 import { asyncHandler } from "../utils/AsyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import HttpStatus from "../utils/HttpStatus.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
+import {
+    uploadOnCloudinary,
+    deleteFromCloudinary,
+} from "../utils/Cloudinary.js";
 
 // Get All Users (with Search & Filter by name, email, or role)
 export const getAllUsers = asyncHandler(async (req, res) => {
@@ -40,7 +44,7 @@ export const getAllUsers = asyncHandler(async (req, res) => {
         );
 });
 
-// Update User Details (name, email, role, status, or password)
+// Update User Details (By Admin/ID with Cloudinary Image Replacement)
 export const updateUser = asyncHandler(async (req, res) => {
     const { id } = req.params;
     const updateData = { ...req.body };
@@ -53,14 +57,49 @@ export const updateUser = asyncHandler(async (req, res) => {
         );
     }
 
+    const existingUser = await User.findById(id);
+    if (!existingUser) {
+        throw new ApiError(HttpStatus.NOT_FOUND || 404, "User not found.");
+    }
+
+    // Avatar Upload & Old Avatar Delete
+    if (req.files && req.files.avatar && req.files.avatar[0]) {
+        const avatarLocalPath = req.files.avatar[0].path.replace(/\\/g, "/");
+        const avatarResponse = await uploadOnCloudinary(avatarLocalPath);
+
+        if (!avatarResponse) {
+            throw new ApiError(400, "Failed to upload new avatar.");
+        }
+
+        if (existingUser.avatarPublicId) {
+            await deleteFromCloudinary(existingUser.avatarPublicId);
+        }
+
+        updateData.avatar = avatarResponse.secure_url;
+        updateData.avatarPublicId = avatarResponse.public_id;
+    }
+
+    // Cover Image Upload & Old Cover Image Delete
+    if (req.files && req.files.coverImage && req.files.coverImage[0]) {
+        const coverLocalPath = req.files.coverImage[0].path.replace(/\\/g, "/");
+        const coverResponse = await uploadOnCloudinary(coverLocalPath);
+
+        if (!coverResponse) {
+            throw new ApiError(400, "Failed to upload new cover image.");
+        }
+
+        if (existingUser.coverImagePublicId) {
+            await deleteFromCloudinary(existingUser.coverImagePublicId);
+        }
+
+        updateData.coverImage = coverResponse.secure_url;
+        updateData.coverImagePublicId = coverResponse.public_id;
+    }
+
     const updatedUser = await User.findByIdAndUpdate(id, updateData, {
         new: true,
         runValidators: true,
     }).select("-password");
-
-    if (!updatedUser) {
-        throw new ApiError(HttpStatus.NOT_FOUND || 404, "User not found.");
-    }
 
     return res
         .status(HttpStatus.OK || 200)
@@ -73,14 +112,26 @@ export const updateUser = asyncHandler(async (req, res) => {
         );
 });
 
-// Delete Single User by ID
+// Delete Single User by ID (With Cloudinary Images Cleanup)
 export const deleteUser = asyncHandler(async (req, res) => {
     const { id } = req.params;
-    const deletedUser = await User.findByIdAndDelete(id);
 
-    if (!deletedUser) {
+    const user = await User.findById(id);
+    if (!user) {
         throw new ApiError(HttpStatus.NOT_FOUND || 404, "User not found.");
     }
+
+    // Delete avatar from Cloudinary if exists
+    if (user.avatarPublicId) {
+        await deleteFromCloudinary(user.avatarPublicId);
+    }
+
+    // Delete cover image from Cloudinary if exists
+    if (user.coverImagePublicId) {
+        await deleteFromCloudinary(user.coverImagePublicId);
+    }
+
+    const deletedUser = await User.findByIdAndDelete(id);
 
     return res
         .status(HttpStatus.OK || 200)
@@ -88,7 +139,7 @@ export const deleteUser = asyncHandler(async (req, res) => {
             new ApiResponse(
                 HttpStatus.OK || 200,
                 null,
-                "User deleted successfully."
+                "User and associated images deleted successfully."
             )
         );
 });
