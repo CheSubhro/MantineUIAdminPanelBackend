@@ -8,20 +8,23 @@ import {
     bulkDeleteComments,
     sendReply,
 } from "../controllers/comment.controller.js";
+import { verifyJWT } from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
 
-// Get all comments & Create a new comment (Public / Frontend submission)
+// ==================== Public Routes ====================
 router.route("/").get(getAllComments).post(createComment);
 
-// Bulk delete comments (Admin route)
-router.route("/bulk").delete(bulkDeleteComments);
+// ==================== Private / Protected Routes ====================
 
-// Update comment status (Approve/Spam), Reply, & Delete single comment (Admin routes)
+// Bulk delete comments (Admin route)
+router.route("/bulk").delete(verifyJWT, bulkDeleteComments);
+
+// Update comment status (Approve/Spam), Reply, & Delete single comment (Admin/Protected routes)
 router
     .route("/:id")
-    .patch(updateCommentStatus) 
-    .post(sendReply)           
-    .delete(deleteComment);    
+    .patch(verifyJWT, updateCommentStatus) 
+    .post(verifyJWT, sendReply)               
+    .delete(verifyJWT, deleteComment);  
 
 export default router;
