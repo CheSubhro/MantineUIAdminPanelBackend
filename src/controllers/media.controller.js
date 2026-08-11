@@ -39,7 +39,16 @@ export const uploadMedia = asyncHandler(async (req, res) => {
     if (!cloudinaryResponse || !cloudinaryResponse.secure_url) {
         throw new ApiError(
             HttpStatus.BAD_REQUEST || 400,
-            "Failed to upload media to Cloudinary."
+            "Failed to upload media to Cloudinary due to timeout or network issue."
+        );
+    }
+
+    const uploaderId = req.user?._id || req.body.uploadedBy;
+
+    if (!uploaderId) {
+        throw new ApiError(
+            HttpStatus.UNAUTHORIZED || 401,
+            "Unauthorized request. Uploader reference is missing."
         );
     }
 
@@ -48,7 +57,7 @@ export const uploadMedia = asyncHandler(async (req, res) => {
         url: cloudinaryResponse.secure_url,
         size: req.file.size,
         publicId: cloudinaryResponse.public_id,
-        uploadedBy: req.user?._id, // Assuming authentication middleware populates req.user
+        uploadedBy: uploaderId,
     });
 
     return res
@@ -62,7 +71,7 @@ export const uploadMedia = asyncHandler(async (req, res) => {
         );
 });
 
-// Delete Media File (MongoDB & Cloudinary Cleanup)
+// Delete Single Media File (MongoDB & Cloudinary Cleanup)
 export const deleteMedia = asyncHandler(async (req, res) => {
     const { id } = req.params;
 
@@ -88,6 +97,43 @@ export const deleteMedia = asyncHandler(async (req, res) => {
                 HttpStatus.OK || 200,
                 { id },
                 "Media file has been removed successfully."
+            )
+        );
+});
+
+// Bulk Delete Media Files (Sequential Cloudinary Cleanup)
+export const bulkDeleteMedia = asyncHandler(async (req, res) => {
+    const { ids } = req.body;
+
+    if (!ids || !Array.isArray(ids) || ids.length === 0) {
+        throw new ApiError(
+            HttpStatus.BAD_REQUEST || 400,
+            "No media IDs provided for bulk deletion."
+        );
+    }
+
+    const mediaToDelete = await Media.find({
+        _id: { $in: ids },
+    });
+
+    const result = await Media.deleteMany({
+        _id: { $in: ids },
+    });
+
+    // Delete images from Cloudinary sequentially to avoid timeout/rate-limit
+    for (const media of mediaToDelete) {
+        if (media.publicId) {
+            await deleteFromCloudinary(media.publicId);
+        }
+    }
+
+    return res
+        .status(HttpStatus.OK || 200)
+        .json(
+            new ApiResponse(
+                HttpStatus.OK || 200,
+                { deletedIds: ids },
+                `${result.deletedCount} media files have been removed successfully.`
             )
         );
 });

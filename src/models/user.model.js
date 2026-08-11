@@ -1,14 +1,14 @@
 
-import mongoose from "mongoose";
+import mongoose, { Schema } from "mongoose";
 import bcrypt from "bcrypt";
 
-const userSchema = new mongoose.Schema(
+const userSchema = new Schema(
     {
         name: {
             type: String,
             required: [true, "Name is required"],
             trim: true,
-            minlength: [2, "Name must be at least 2 characters long"],
+            minlength: [3, "Name must be at least 3 characters long"],
         },
         username: {
             type: String,
@@ -34,11 +34,44 @@ const userSchema = new mongoose.Schema(
         password: {
             type: String,
             required: [true, "Password is required"],
-            minlength: [6, "Password must be at least 6 characters long"],
+            minlength: [8, "Password must be at least 8 characters long"],
+            validate: {
+                validator: function (value) {
+                    return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/.test(
+                        value
+                    );
+                },
+                message:
+                    "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character.",
+            },
+        },
+        // Avatar field (Cloudinary URL - Optional)
+        avatar: {
+            type: String,
+            required: false,
+        },
+        // Cover image field (Cloudinary URL - Optional)
+        coverImage: {
+            type: String,
+            required: false,
         },
         role: {
             type: String,
-            enum: ["Admin", "Manager", "User"],
+            enum: [
+                "Super_Admin",
+                "Admin",
+                "Manager",
+                "Moderator",
+                "Editor",
+                "User",
+                "Author",
+                "Contributor",
+                "Developer",
+                "Customer_Support",
+                "Seller",
+                "Rider",
+                "Accountant",
+            ],
             default: "User",
             index: true,
         },
@@ -48,6 +81,10 @@ const userSchema = new mongoose.Schema(
             default: "Active",
             index: true,
         },
+        // Refresh token field (Stored in DB to prevent token hassle)
+        refreshToken: {
+            type: String,
+        },
     },
     {
         timestamps: true,
@@ -56,7 +93,6 @@ const userSchema = new mongoose.Schema(
 
 // Pre-save hook to hash password before saving to database
 userSchema.pre("save", async function (next) {
-    // Only hash the password if it has been modified (or is new)
     if (!this.isModified("password")) return next();
 
     try {
