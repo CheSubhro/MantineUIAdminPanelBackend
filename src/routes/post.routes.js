@@ -8,16 +8,21 @@ import {
     bulkDeletePosts,
 } from "../controllers/post.controller.js";
 import { upload } from "../middlewares/multer.middleware.js";
+import { verifyJWT } from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
 
-// Get all posts & Create a new post 
-router.route("/").get(getAllPosts).post(upload.single("image"), createPost);
+// ==================== Public Routes ====================
+router.route("/").get(getAllPosts);
 
-// Bulk delete posts 
-router.route("/bulk").delete(bulkDeletePosts);
+// ==================== Private / Protected Routes ====================
+router.route("/").post(verifyJWT, upload.single("image"), createPost);
 
-// Update & Delete single post
-router.route("/:id").put(upload.single("image"), updatePost).delete(deletePost);
+router.route("/bulk").delete(verifyJWT, bulkDeletePosts);
+
+router
+    .route("/:id")
+    .put(verifyJWT, upload.single("image"), updatePost)
+    .delete(verifyJWT, deletePost);
 
 export default router;
